@@ -1,18 +1,17 @@
-import os
 from dotenv import load_dotenv
 
 load_dotenv()
 
-# Gemini
-GEMINI_API_KEY = os.environ["GEMINI_API_KEY"]
-GEMINI_MODEL = "gemini-1.5-pro"
+# Vertex AI
+PROJECT_ID = "project-e8d0f587-1b9b-444c-b58"
+LOCATION = "global"
+GEMINI_MODEL = "gemini-2.5-flash"
 
 # Server
 HOST = "0.0.0.0"
 PORT = 5000
+USE_HTTPS = True
 
-# The prompt sent to Gemini with every video.
-# Changing this changes the entire output behavior — tune this when iterating.
 GEMINI_PROMPT = """You are an emergency ASL interpreter assisting first responders.
 A person is signing in American Sign Language in this video clip.
 Describe what emergency they are communicating in a single clear sentence,
@@ -26,10 +25,10 @@ Examples of good responses:
 - "This person is signing that someone has fallen and is injured."
 
 If the signing is unclear or the video is too dark or obstructed, respond:
-"The sign was unclear — please ask the person to repeat."
+"The sign was unclear - please ask the person to repeat."
 
 Rules:
 - Respond with only the one sentence. No preamble, no explanation.
-- Never say "the signer" — always say "this person".
+- Never say "the signer" - always say "this person".
 - Be specific about body location if a sign indicates it (chest, head, arm).
 """

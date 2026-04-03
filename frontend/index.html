@@ -48,9 +48,8 @@
     <p id="spinner-label">Translating...</p>
   </div>
 
-  <!-- Socket.IO client — loaded from the Flask server itself -->
-  <!-- Flask-SocketIO automatically serves this at /socket.io/socket.io.js -->
-  <script src="/socket.io/socket.io.js"></script>
+  <!-- Load the browser Socket.IO client explicitly. -->
+  <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
   <script src="app.js"></script>
 
 </body>

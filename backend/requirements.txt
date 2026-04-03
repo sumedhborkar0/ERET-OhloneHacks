@@ -1,6 +1,6 @@
 flask
 flask-socketio
 flask-cors
-google-generativeai
+google-genai
 python-dotenv
 qrcode[pil]
