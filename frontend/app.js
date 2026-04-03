@@ -4,13 +4,9 @@ const state = {
   mediaRecorder: null,
   chunks: [],
   stream: null,
-  trackSettings: null,
   ringInterval: null,
   ringProgress: 0,
-  maxRecordMs: 10000,
-  minRecordMs: 1200,
-  recordingStartedAt: 0,
-  preferredFacingMode: "user",
+  maxRecordMs: 6000,
 };
 
 const el = {
@@ -21,14 +17,12 @@ const el = {
   recordBtn: document.getElementById("record-btn"),
   btnLabel: document.getElementById("btn-label"),
   ringFill: document.getElementById("ring-fill"),
+  recordingHint: document.getElementById("recording-hint"),
   resultCard: document.getElementById("result-card"),
   resultText: document.getElementById("result-text"),
-  resultMeta: document.getElementById("result-meta"),
   againBtn: document.getElementById("again-btn"),
   spinner: document.getElementById("spinner"),
   spinLabel: document.getElementById("spinner-label"),
-  hintText: document.getElementById("hint-text"),
-  cameraBtn: document.getElementById("camera-btn"),
 };
 
 let socket = null;
@@ -46,6 +40,7 @@ if (typeof window.io !== "function") {
     el.dot.className = "connected";
     el.connLabel.textContent = "Connected";
     el.recordBtn.disabled = false;
+    setIdleUI();
   });
 
   socket.on("connect_error", (err) => {
@@ -53,6 +48,7 @@ if (typeof window.io !== "function") {
     el.dot.className = "disconnected";
     el.connLabel.textContent = `Connection failed: ${err.message}`;
     el.recordBtn.disabled = true;
+    el.recordingHint.textContent = "The phone cannot send clips until the socket reconnects.";
   });
 
   socket.on("disconnect", () => {
@@ -60,53 +56,53 @@ if (typeof window.io !== "function") {
     el.dot.className = "disconnected";
     el.connLabel.textContent = "Disconnected - refresh to reconnect";
     el.recordBtn.disabled = true;
+    el.recordingHint.textContent = "The phone disconnected from the server. Refresh to reconnect.";
+  });
+
+  socket.on("processing", (data) => {
+    el.spinLabel.textContent = data.message;
+    show(el.spinner);
+  });
+
+  socket.on("result", (data) => {
+    hide(el.spinner);
+    el.resultText.textContent = data.sentence;
+    el.resultCard.style.background = "#1d3557";
+    show(el.resultCard);
+  });
+
+  socket.on("error", (data) => {
+    hide(el.spinner);
+    el.resultText.textContent = data.message;
+    el.resultCard.style.background = "#4a1a1a";
+    show(el.resultCard);
   });
 }
 
 async function initCamera() {
-  if (state.stream) {
-    for (const track of state.stream.getTracks()) {
-      track.stop();
-    }
-  }
-
   try {
     state.stream = await navigator.mediaDevices.getUserMedia({
-      video: {
-        facingMode: { ideal: state.preferredFacingMode },
-        width: { ideal: 1920 },
-        height: { ideal: 1080 },
-        frameRate: { ideal: 30, max: 30 },
-      },
+      video: { facingMode: "user", width: { ideal: 640 }, height: { ideal: 480 } },
       audio: false,
     });
-    const [track] = state.stream.getVideoTracks();
-    state.trackSettings = track ? track.getSettings() : null;
     el.preview.srcObject = state.stream;
-    el.preview.classList.toggle("mirror-preview", state.preferredFacingMode === "user");
-    updateHint("Keep both hands and your upper body fully inside the frame.");
   } catch (err) {
     el.connLabel.textContent = `Camera unavailable: ${err.message}`;
     el.recordBtn.disabled = true;
+    el.recordingHint.textContent = "Camera access is required before recording can start.";
   }
 }
+
+el.recordBtn.addEventListener("click", toggleRecording);
 
 function toggleRecording() {
   if (state.recording) {
     stopRecording();
     return;
   }
+
   startRecording();
 }
-
-el.recordBtn.addEventListener("click", toggleRecording);
-
-el.cameraBtn.addEventListener("click", async () => {
-  state.preferredFacingMode = state.preferredFacingMode === "user" ? "environment" : "user";
-  el.cameraBtn.textContent = state.preferredFacingMode === "user" ? "Use Rear Camera" : "Use Front Camera";
-  updateHint("Switching camera...");
-  await initCamera();
-});
 
 function startRecording() {
   if (!state.connected || state.recording || !state.stream) {
@@ -119,18 +115,22 @@ function startRecording() {
   const mimeType = pickSupportedMimeType();
   if (!mimeType) {
     state.recording = false;
-    showFailure("This browser cannot record a supported video format.");
+    el.resultText.textContent = "This browser cannot record a supported video format.";
+    el.resultCard.style.background = "#4a1a1a";
+    show(el.resultCard);
     return;
   }
 
   try {
     state.mediaRecorder = new MediaRecorder(state.stream, {
       mimeType,
-      videoBitsPerSecond: 6000000,
+      videoBitsPerSecond: 500000,
     });
   } catch (err) {
     state.recording = false;
-    showFailure(`Recorder failed: ${err.message}`);
+    el.resultText.textContent = `Recorder failed: ${err.message}`;
+    el.resultCard.style.background = "#4a1a1a";
+    show(el.resultCard);
     return;
   }
 
@@ -141,16 +141,14 @@ function startRecording() {
   };
 
   state.mediaRecorder.onstop = onRecordingStop;
-  state.recordingStartedAt = Date.now();
-  state.mediaRecorder.start(200);
+  state.mediaRecorder.start(100);
 
   show(el.recOverlay);
   el.recordBtn.classList.add("recording");
-  el.btnLabel.textContent = "Tap to Send";
+  el.btnLabel.textContent = "Tap to Stop";
+  el.recordingHint.textContent = "Recording now. Tap again when the signing is complete.";
   hide(el.resultCard);
   el.resultCard.style.background = "#1d3557";
-
-  updateHint("Record one complete sign, then tap again to submit.");
 
   state.ringProgress = 0;
   const circumference = 339.3;
@@ -176,7 +174,7 @@ function stopRecording() {
   el.ringFill.style.strokeDashoffset = 339.3;
   hide(el.recOverlay);
   el.recordBtn.classList.remove("recording");
-  el.btnLabel.textContent = "Tap to Record";
+  setIdleUI();
 
   if (state.mediaRecorder && state.mediaRecorder.state === "recording") {
     state.mediaRecorder.stop();
@@ -191,74 +189,31 @@ function onRecordingStop() {
   const mimeType = state.mediaRecorder && state.mediaRecorder.mimeType
     ? state.mediaRecorder.mimeType
     : state.chunks[0].type || "video/webm";
-  const blob = new Blob(state.chunks, { type: mimeType });
-  const durationMs = Math.max(0, Date.now() - state.recordingStartedAt);
+  const normalizedMimeType = normalizeMimeType(mimeType);
+  const blob = new Blob(state.chunks, { type: normalizedMimeType });
 
-  if (durationMs < state.minRecordMs) {
-    showFailure(`Recording too short. Sign for at least ${(state.minRecordMs / 1000).toFixed(1)} seconds.`);
-    updateHint("Start recording, complete one sign, then tap send.");
-    return;
-  }
-
-  if (blob.size < 12000) {
-    showFailure("Video quality was too low. Try again with your hands centered and fully visible.");
-    updateHint("Stand farther back if your hands are leaving the frame.");
-    return;
-  }
-
-  el.spinLabel.textContent = "Uploading...";
-  show(el.spinner);
-  updateHint("Processing clip...");
-
-  const formData = new FormData();
-  formData.append("video", blob, `recording.${mimeType.includes("mp4") ? "mp4" : "webm"}`);
-  formData.append("mimeType", mimeType);
-  formData.append("capture", JSON.stringify({
-    durationMs,
-    chunkCount: state.chunks.length,
-    bytes: blob.size,
-    trackSettings: state.trackSettings,
-    preferredFacingMode: state.preferredFacingMode,
-  }));
-
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 90000);
-
-  fetch("/api/translate", {
-    method: "POST",
-    body: formData,
-    signal: controller.signal,
-  }).then(async (response) => {
-    clearTimeout(timeoutId);
-    const payload = await response.json().catch(() => ({}));
+  if (blob.size < 5000) {
     hide(el.spinner);
-
-    if (!response.ok) {
-      throw new Error(payload.message || `Upload failed with status ${response.status}`);
-    }
-
-    const confidence = typeof payload.confidence === "number"
-      ? `${Math.round(payload.confidence * 100)}% confidence`
-      : "";
-
-    el.resultText.textContent = payload.sentence || "The sign was unclear - please ask the person to repeat.";
-    el.resultMeta.textContent = payload.needsRetry
-      ? "Low-confidence read. Try again with a single clear sign."
-      : confidence;
-    el.resultCard.style.background = payload.needsRetry ? "#4a1a1a" : "#1d3557";
+    el.resultText.textContent = "Recording too short - tap record and sign for a bit longer.";
+    el.resultCard.style.background = "#4a1a1a";
     show(el.resultCard);
+    return;
+  }
 
-    updateHint(payload.needsRetry
-      ? "Retry with one clear sign and keep both hands visible."
-      : "Ready for the next sign.");
+  el.spinLabel.textContent = "Sending...";
+  el.recordingHint.textContent = "Clip captured. Sending it to the translator now.";
+  show(el.spinner);
+
+  blob.arrayBuffer().then((buffer) => {
+    socket.emit("video_data", {
+      video: buffer,
+      mimeType: normalizedMimeType,
+    });
   }).catch((err) => {
-    clearTimeout(timeoutId);
     hide(el.spinner);
-    const message = err.name === "AbortError"
-      ? "Upload timed out. Please try again."
-      : err.message;
-    showFailure(message);
-    updateHint("Check framing and try another clip.");
+    el.resultText.textContent = `Failed to prepare recording: ${err.message}`;
+    el.resultCard.style.background = "#4a1a1a";
+    show(el.resultCard);
   });
 }
 
@@ -279,21 +234,22 @@ function pickSupportedMimeType() {
   return "";
 }
 
-el.againBtn.addEventListener("click", () => {
-  hide(el.resultCard);
-  updateHint("Record one complete sign when ready.");
-});
+function normalizeMimeType(mimeType) {
+  if (!mimeType) {
+    return "video/webm";
+  }
 
-function showFailure(message) {
-  hide(el.spinner);
-  el.resultText.textContent = message;
-  el.resultMeta.textContent = "";
-  el.resultCard.style.background = "#4a1a1a";
-  show(el.resultCard);
+  return mimeType.split(";", 1)[0].trim().toLowerCase() || "video/webm";
 }
 
-function updateHint(message) {
-  el.hintText.textContent = message;
+el.againBtn.addEventListener("click", () => {
+  hide(el.resultCard);
+  setIdleUI();
+});
+
+function setIdleUI() {
+  el.btnLabel.textContent = "Tap to Record";
+  el.recordingHint.textContent = "Up to 6 seconds. Best results come from steady framing and good light.";
 }
 
 function show(elem) {
@@ -304,5 +260,4 @@ function hide(elem) {
   elem.classList.add("hidden");
 }
 
-el.btnLabel.textContent = "Tap to Record";
 initCamera();

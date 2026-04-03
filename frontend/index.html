@@ -7,43 +7,64 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <div id="status-bar">
-    <span id="connection-dot"></span>
-    <span id="connection-label">Connecting...</span>
-  </div>
+  <main class="app-shell">
+    <section class="hero-card">
+      <div id="status-bar" class="status-pill">
+        <span id="connection-dot"></span>
+        <span id="connection-label">Connecting...</span>
+      </div>
 
-  <div id="camera-container">
-    <video id="preview" autoplay muted playsinline></video>
-    <div id="recording-overlay" class="hidden">
-      <span id="recording-label">REC</span>
+      <p class="eyebrow">Emergency ASL Relay</p>
+      <h1>Translate urgent signing into one dispatch-ready sentence.</h1>
+      <p class="hero-copy">
+        Tap once to start recording, sign clearly toward the camera, then tap again to send.
+      </p>
+
+      <div class="steps-card">
+        <div class="step-chip">1. Tap record</div>
+        <div class="step-chip">2. Sign clearly</div>
+        <div class="step-chip">3. Tap again to send</div>
+      </div>
+    </section>
+
+    <section class="camera-card">
+      <div id="camera-container">
+        <video id="preview" autoplay muted playsinline></video>
+        <div class="camera-gradient"></div>
+        <div id="recording-overlay" class="hidden">
+          <span id="recording-label">Recording</span>
+        </div>
+      </div>
+
+      <div class="controls-row">
+        <div id="button-area">
+          <button id="record-btn" disabled>
+            <span id="btn-label">Tap to Record</span>
+          </button>
+          <svg id="progress-ring" viewBox="0 0 120 120" aria-hidden="true">
+            <circle id="ring-track" cx="60" cy="60" r="54" />
+            <circle id="ring-fill" cx="60" cy="60" r="54" />
+          </svg>
+        </div>
+
+        <div class="recording-copy">
+          <p class="control-title">Quick capture</p>
+          <p id="recording-hint">Up to 6 seconds. Best results come from steady framing and good light.</p>
+        </div>
+      </div>
+    </section>
+
+    <div id="spinner" class="status-card hidden">
+      <div class="spin"></div>
+      <p id="spinner-label">Translating...</p>
     </div>
-  </div>
 
-  <div id="hint-card">
-    <p id="hint-text">Keep both hands and your upper body fully inside the frame.</p>
-    <button id="camera-btn" type="button">Use Rear Camera</button>
-  </div>
-
-  <div id="button-area">
-    <button id="record-btn" disabled>
-      <span id="btn-label">Tap to Record</span>
-    </button>
-    <svg id="progress-ring" viewBox="0 0 120 120">
-      <circle id="ring-track" cx="60" cy="60" r="54" />
-      <circle id="ring-fill" cx="60" cy="60" r="54" />
-    </svg>
-  </div>
-
-  <div id="result-card" class="hidden">
-    <p id="result-text"></p>
-    <p id="result-meta"></p>
-    <button id="again-btn">Sign Again</button>
-  </div>
-
-  <div id="spinner" class="hidden">
-    <div class="spin"></div>
-    <p id="spinner-label">Translating...</p>
-  </div>
+    <div id="result-card" class="result-card hidden">
+      <p class="result-label">Translation</p>
+      <p id="result-text"></p>
+      <button id="again-btn">Record Again</button>
+    </div>
+  </main>
 
   <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
   <script src="app.js"></script>
