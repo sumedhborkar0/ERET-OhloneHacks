@@ -4,9 +4,14 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
   <title>ASL Emergency Translator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
+  <div class="bg-orb bg-orb-left"></div>
+  <div class="bg-orb bg-orb-right"></div>
   <main class="app-shell">
     <section class="hero-card">
       <div id="status-bar" class="status-pill">
@@ -24,6 +29,10 @@
         <div class="step-chip">1. Tap record</div>
         <div class="step-chip">2. Sign clearly</div>
         <div class="step-chip">3. Tap again to send</div>
+      </div>
+
+      <div class="hero-note">
+        Built for fast handoff to first responders when every second matters.
       </div>
     </section>
 
@@ -54,16 +63,18 @@
       </div>
     </section>
 
-    <div id="spinner" class="status-card hidden">
-      <div class="spin"></div>
-      <p id="spinner-label">Translating...</p>
-    </div>
+    <section id="output-dock" class="output-dock">
+      <div id="spinner" class="status-card hidden">
+        <div class="spin"></div>
+        <p id="spinner-label">Translating...</p>
+      </div>
 
-    <div id="result-card" class="result-card hidden">
-      <p class="result-label">Translation</p>
-      <p id="result-text"></p>
-      <button id="again-btn">Record Again</button>
-    </div>
+      <div id="result-card" class="result-card hidden">
+        <p class="result-label">Translation</p>
+        <p id="result-text"></p>
+        <button id="again-btn">Record Again</button>
+      </div>
+    </section>
   </main>
 
   <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>

@@ -18,6 +18,7 @@ const el = {
   btnLabel: document.getElementById("btn-label"),
   ringFill: document.getElementById("ring-fill"),
   recordingHint: document.getElementById("recording-hint"),
+  outputDock: document.getElementById("output-dock"),
   resultCard: document.getElementById("result-card"),
   resultText: document.getElementById("result-text"),
   againBtn: document.getElementById("again-btn"),
@@ -62,6 +63,7 @@ if (typeof window.io !== "function") {
   socket.on("processing", (data) => {
     el.spinLabel.textContent = data.message;
     show(el.spinner);
+    revealOutput();
   });
 
   socket.on("result", (data) => {
@@ -69,6 +71,7 @@ if (typeof window.io !== "function") {
     el.resultText.textContent = data.sentence;
     el.resultCard.style.background = "#1d3557";
     show(el.resultCard);
+    revealOutput();
   });
 
   socket.on("error", (data) => {
@@ -76,6 +79,7 @@ if (typeof window.io !== "function") {
     el.resultText.textContent = data.message;
     el.resultCard.style.background = "#4a1a1a";
     show(el.resultCard);
+    revealOutput();
   });
 }
 
@@ -118,6 +122,7 @@ function startRecording() {
     el.resultText.textContent = "This browser cannot record a supported video format.";
     el.resultCard.style.background = "#4a1a1a";
     show(el.resultCard);
+    revealOutput();
     return;
   }
 
@@ -131,6 +136,7 @@ function startRecording() {
     el.resultText.textContent = `Recorder failed: ${err.message}`;
     el.resultCard.style.background = "#4a1a1a";
     show(el.resultCard);
+    revealOutput();
     return;
   }
 
@@ -197,6 +203,7 @@ function onRecordingStop() {
     el.resultText.textContent = "Recording too short - tap record and sign for a bit longer.";
     el.resultCard.style.background = "#4a1a1a";
     show(el.resultCard);
+    revealOutput();
     return;
   }
 
@@ -214,6 +221,7 @@ function onRecordingStop() {
     el.resultText.textContent = `Failed to prepare recording: ${err.message}`;
     el.resultCard.style.background = "#4a1a1a";
     show(el.resultCard);
+    revealOutput();
   });
 }
 
@@ -258,6 +266,10 @@ function show(elem) {
 
 function hide(elem) {
   elem.classList.add("hidden");
+}
+
+function revealOutput() {
+  el.outputDock.scrollIntoView({ block: "end", behavior: "smooth" });
 }
 
 initCamera();
