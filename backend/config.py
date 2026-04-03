@@ -14,7 +14,10 @@ GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-pro")
 # Server
 HOST = "0.0.0.0"
 PORT = 5000
-USE_HTTPS = True
+USE_HTTPS = os.getenv("USE_HTTPS", "false").strip().lower() in {"1", "true", "yes", "on"}
+PUBLIC_URL = os.getenv("PUBLIC_URL", "").strip()
+AUTO_START_NGROK = os.getenv("AUTO_START_NGROK", "true").strip().lower() in {"1", "true", "yes", "on"}
+NGROK_PATH = os.getenv("NGROK_PATH", "").strip()
 
 GEMINI_PROMPT = """You are an emergency ASL interpreter assisting first responders.
 A person is signing in American Sign Language in this video clip.
