@@ -198,6 +198,9 @@ h1 {
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+#preview.is-mirrored {
   transform: scaleX(-1);
 }
 
@@ -208,6 +211,42 @@ h1 {
     linear-gradient(180deg, rgba(14, 12, 10, 0.02), rgba(14, 12, 10, 0.38)),
     linear-gradient(0deg, rgba(255, 246, 235, 0.04), rgba(255, 246, 235, 0));
   pointer-events: none;
+}
+
+.camera-toggle {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 3;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+  background: rgba(24, 18, 14, 0.6);
+  color: #fff8f0;
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  backdrop-filter: blur(10px);
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.16s ease, opacity 0.2s ease;
+}
+
+.camera-toggle-left {
+  right: auto;
+  left: 12px;
+}
+
+.camera-toggle:hover {
+  background: rgba(24, 18, 14, 0.78);
+}
+
+.camera-toggle:active {
+  transform: scale(0.98);
+}
+
+.camera-toggle:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
 }
 
 #recording-overlay {
@@ -336,6 +375,103 @@ h1 {
   gap: 10px;
   padding-bottom: max(2px, env(safe-area-inset-bottom));
   z-index: 2;
+}
+
+body.camera-focus {
+  overflow: hidden;
+}
+
+body.camera-focus .hero-card {
+  display: none;
+}
+
+body.camera-focus .camera-card {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100dvh;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  border-radius: 0;
+  border: none;
+  background: #000;
+  box-shadow: none;
+  z-index: 20;
+}
+
+body.camera-focus .camera-card::before {
+  display: none;
+}
+
+body.camera-focus #camera-container {
+  height: 100dvh;
+  aspect-ratio: auto;
+  border-radius: 0;
+  border: none;
+}
+
+body.camera-focus .camera-gradient {
+  background:
+    linear-gradient(180deg, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0) 28%),
+    linear-gradient(0deg, rgba(0, 0, 0, 0.58), rgba(0, 0, 0, 0) 28%);
+}
+
+body.camera-focus .controls-row {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: max(12px, calc(env(safe-area-inset-bottom) + 32px));
+  grid-template-columns: 1fr;
+  justify-items: center;
+  gap: 10px;
+  padding: 0 16px;
+  z-index: 21;
+}
+
+body.camera-focus .recording-copy {
+  max-width: 320px;
+  text-align: center;
+  gap: 4px;
+}
+
+body.camera-focus .control-title,
+body.camera-focus #recording-hint {
+  color: #f8ede2;
+}
+
+body.camera-focus .output-dock {
+  position: fixed;
+  left: 16px;
+  right: 16px;
+  bottom: max(18px, env(safe-area-inset-bottom));
+  z-index: 22;
+  margin-top: 0;
+}
+
+body.camera-focus .status-card,
+body.camera-focus .result-card {
+  background: rgba(14, 11, 9, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(18px);
+  color: #fff7f0;
+}
+
+body.camera-focus .result-label,
+body.camera-focus #spinner-label,
+body.camera-focus #result-text {
+  color: #fff7f0;
+}
+
+body.camera-focus #again-btn {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff7f0;
+  border-color: rgba(255, 255, 255, 0.16);
+}
+
+body.camera-focus .spin {
+  border-color: rgba(255, 255, 255, 0.16);
+  border-top-color: #f0a35d;
 }
 
 .status-card,

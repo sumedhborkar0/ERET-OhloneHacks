@@ -37,9 +37,11 @@
     </section>
 
     <section class="camera-card">
-      <div id="camera-container">
+      <div id="camera-container" title="Tap the camera to focus on the live view.">
         <video id="preview" autoplay muted playsinline></video>
         <div class="camera-gradient"></div>
+        <button id="focus-camera-btn" class="camera-toggle camera-toggle-left" type="button">Fullscreen</button>
+        <button id="toggle-camera-btn" class="camera-toggle" type="button">Toggle Camera</button>
         <div id="recording-overlay" class="hidden">
           <span id="recording-label">Recording</span>
         </div>

@@ -4,6 +4,7 @@ const state = {
   mediaRecorder: null,
   chunks: [],
   stream: null,
+  facingMode: "user",
   ringInterval: null,
   ringProgress: 0,
   maxRecordMs: 6000,
@@ -13,7 +14,10 @@ const el = {
   dot: document.getElementById("connection-dot"),
   connLabel: document.getElementById("connection-label"),
   preview: document.getElementById("preview"),
+  cameraContainer: document.getElementById("camera-container"),
   recOverlay: document.getElementById("recording-overlay"),
+  focusCameraBtn: document.getElementById("focus-camera-btn"),
+  toggleCameraBtn: document.getElementById("toggle-camera-btn"),
   recordBtn: document.getElementById("record-btn"),
   btnLabel: document.getElementById("btn-label"),
   ringFill: document.getElementById("ring-fill"),
@@ -84,20 +88,32 @@ if (typeof window.io !== "function") {
 }
 
 async function initCamera() {
+  releaseStream();
+
   try {
     state.stream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: "user", width: { ideal: 640 }, height: { ideal: 480 } },
+      video: {
+        facingMode: { ideal: state.facingMode },
+        width: { ideal: 640 },
+        height: { ideal: 480 },
+      },
       audio: false,
     });
     el.preview.srcObject = state.stream;
+    applyFacingModeUI();
+    el.toggleCameraBtn.disabled = false;
   } catch (err) {
     el.connLabel.textContent = `Camera unavailable: ${err.message}`;
     el.recordBtn.disabled = true;
+    el.toggleCameraBtn.disabled = true;
     el.recordingHint.textContent = "Camera access is required before recording can start.";
   }
 }
 
 el.recordBtn.addEventListener("click", toggleRecording);
+el.focusCameraBtn.addEventListener("click", toggleFocusMode);
+el.toggleCameraBtn.addEventListener("click", toggleCamera);
+el.cameraContainer.addEventListener("click", handleCameraContainerClick);
 
 function toggleRecording() {
   if (state.recording) {
@@ -250,6 +266,17 @@ function normalizeMimeType(mimeType) {
   return mimeType.split(";", 1)[0].trim().toLowerCase() || "video/webm";
 }
 
+async function toggleCamera() {
+  if (state.recording) {
+    el.recordingHint.textContent = "Stop recording before switching cameras.";
+    return;
+  }
+
+  state.facingMode = state.facingMode === "user" ? "environment" : "user";
+  el.toggleCameraBtn.disabled = true;
+  await initCamera();
+}
+
 el.againBtn.addEventListener("click", () => {
   hide(el.resultCard);
   setIdleUI();
@@ -270,6 +297,42 @@ function hide(elem) {
 
 function revealOutput() {
   el.outputDock.scrollIntoView({ block: "end", behavior: "smooth" });
+}
+
+function applyFacingModeUI() {
+  el.preview.classList.toggle("is-mirrored", state.facingMode === "user");
+}
+
+function handleCameraContainerClick(event) {
+  if (event.target.closest("button")) {
+    return;
+  }
+
+  if (!document.body.classList.contains("camera-focus")) {
+    setFocusMode(true);
+  }
+}
+
+function toggleFocusMode(event) {
+  event.stopPropagation();
+  setFocusMode(!document.body.classList.contains("camera-focus"));
+}
+
+function setFocusMode(enabled) {
+  document.body.classList.toggle("camera-focus", enabled);
+  el.focusCameraBtn.textContent = enabled ? "Close Fullscreen" : "Fullscreen";
+}
+
+function releaseStream() {
+  if (!state.stream) {
+    return;
+  }
+
+  for (const track of state.stream.getTracks()) {
+    track.stop();
+  }
+
+  state.stream = null;
 }
 
 initCamera();
