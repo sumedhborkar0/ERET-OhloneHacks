@@ -1,0 +1,28 @@
+{
+  "mime_type": "video/webm; codecs=vp09.00.10.08",
+  "bytes": 621186,
+  "capture": {
+    "durationMs": 2976,
+    "chunkCount": 3,
+    "bytes": 621186,
+    "trackSettings": {
+      "aspectRatio": 1.7777777777777777,
+      "backgroundBlur": false,
+      "deviceId": "E91A048B12A8EECE2D141C20524340B4524AEF21",
+      "facingMode": "user",
+      "frameRate": 30,
+      "groupId": "26941710612AE353D8DF9E1184EEF9239CF96E1B",
+      "height": 720,
+      "powerEfficient": false,
+      "whiteBalanceMode": "continuous",
+      "width": 1280,
+      "zoom": 1
+    }
+  },
+  "sentence": "The sign was unclear - please ask the person to repeat.",
+  "raw_text": "This person is signing bathroom.",
+  "finish_reason": "FinishReason.STOP",
+  "response_id": "lhvQaZHqEZuUq8YP2fak-AU",
+  "model_version": "gemini-2.5-pro",
+  "prompt_used": "For first responders, interpret the intended word-level ASL meaning of this clip.\nRestrict your answer to likely emergency or hospital signs such as help, choking, pain, bleeding,\ndoctor, nurse, ambulance, cannot breathe, chest pain, seizure, bathroom, or water.\nDo not list letters unless the signer is unmistakably fingerspelling an emergency word.\nReturn one sentence only.\n"
+}

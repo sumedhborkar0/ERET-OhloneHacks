@@ -1,0 +1,28 @@
+{
+  "sid": "wOmHTM6hxgX4PfXFAAAB",
+  "mime_type": "video/webm; codecs=vp09.00.10.08",
+  "bytes": 970170,
+  "capture": {
+    "durationMs": 3901,
+    "chunkCount": 4,
+    "bytes": 970170,
+    "trackSettings": {
+      "aspectRatio": 1.7777777777777777,
+      "backgroundBlur": false,
+      "deviceId": "E91A048B12A8EECE2D141C20524340B4524AEF21",
+      "facingMode": "user",
+      "frameRate": 30,
+      "groupId": "9D069FD97AE35DDE8F6D94B4196C0A431F7157BE",
+      "height": 720,
+      "powerEfficient": false,
+      "whiteBalanceMode": "continuous",
+      "width": 1280,
+      "zoom": 1
+    }
+  },
+  "sentence": "The sign was unclear - please ask the person to repeat.",
+  "raw_text": "The sign",
+  "finish_reason": "FinishReason.MAX_TOKENS",
+  "response_id": "4xbQaY-GB5ub4_UPtqeygQo",
+  "model_version": "gemini-2.5-pro"
+}

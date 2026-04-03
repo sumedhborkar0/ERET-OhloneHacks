@@ -1,0 +1,32 @@
+{
+  "mime_type": "video/webm; codecs=vp09.00.10.08",
+  "bytes": 5578479,
+  "capture": {
+    "durationMs": 7695,
+    "chunkCount": 8,
+    "bytes": 5578479,
+    "trackSettings": {
+      "aspectRatio": 1.7777777777777777,
+      "backgroundBlur": false,
+      "deviceId": "3A670D8CDA74360633E90921DCC5EBA99950BE8B",
+      "facingMode": "environment",
+      "frameRate": 30,
+      "groupId": "BF20C69C2C82A7E2FAEABE1BFD820BCA94CDA08C",
+      "height": 1080,
+      "powerEfficient": false,
+      "torch": false,
+      "whiteBalanceMode": "continuous",
+      "width": 1920,
+      "zoom": 1
+    },
+    "preferredFacingMode": "environment"
+  },
+  "sentence": "This person is signaling that this is an emergency.",
+  "raw_text": "emergency",
+  "label": "emergency",
+  "inference_ms": 6231,
+  "finish_reason": "FinishReason.STOP",
+  "response_id": "qCDQaYbULL-Pq8YPhIOKSQ",
+  "model_version": "gemini-2.5-pro",
+  "prompt_used": "Choose the single best emergency or hospital label for this ASL sign from the allowed enum.\n"
+}

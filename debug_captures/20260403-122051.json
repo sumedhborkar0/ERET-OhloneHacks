@@ -1,0 +1,10 @@
+{
+  "sid": "hKWLL00ldbcfy_ScAAAB",
+  "mime_type": "video/webm; codecs=vp09.00.10.08",
+  "bytes": 404942,
+  "sentence": "This person is asking for.",
+  "raw_text": "This person is asking for",
+  "finish_reason": "FinishReason.MAX_TOKENS",
+  "response_id": "EhPQaeGMJ8utodAPsYmbsAM",
+  "model_version": "gemini-2.5-flash"
+}

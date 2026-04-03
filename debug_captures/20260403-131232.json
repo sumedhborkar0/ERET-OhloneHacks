@@ -1,0 +1,30 @@
+{
+  "mime_type": "video/webm; codecs=vp09.00.10.08",
+  "bytes": 702580,
+  "capture": {
+    "durationMs": 3035,
+    "chunkCount": 3,
+    "bytes": 702580,
+    "trackSettings": {
+      "aspectRatio": 1.7777777777777777,
+      "backgroundBlur": false,
+      "deviceId": "E91A048B12A8EECE2D141C20524340B4524AEF21",
+      "facingMode": "user",
+      "frameRate": 30,
+      "groupId": "DC67858B4CD344B22E174AC8B2E3A8FCAEEFE97E",
+      "height": 720,
+      "powerEfficient": false,
+      "whiteBalanceMode": "continuous",
+      "width": 1280,
+      "zoom": 1
+    }
+  },
+  "sentence": "This person needs the bathroom.",
+  "raw_text": "bathroom",
+  "label": "bathroom",
+  "inference_ms": 426354,
+  "finish_reason": "FinishReason.STOP",
+  "response_id": "iR3QaeOTB4iUq8YP8eX06QQ",
+  "model_version": "gemini-2.5-pro",
+  "prompt_used": "Choose the single best emergency or hospital label for this ASL sign from the allowed enum.\n"
+}

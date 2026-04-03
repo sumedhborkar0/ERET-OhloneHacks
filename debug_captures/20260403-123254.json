@@ -1,0 +1,10 @@
+{
+  "sid": "1KN7KeatyrWgRwkwAAAB",
+  "mime_type": "video/webm; codecs=vp09.00.10.08",
+  "bytes": 278305,
+  "sentence": "The sign was unclear - please ask the person to repeat.",
+  "raw_text": "The sign was unclear",
+  "finish_reason": "FinishReason.MAX_TOKENS",
+  "response_id": "5BXQaaGhMoebq8YP7cex0Ac",
+  "model_version": "gemini-2.5-pro"
+}
