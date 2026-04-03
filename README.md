@@ -57,3 +57,35 @@ python .\run.py
 - If you want local adhoc HTTPS again, set `USE_HTTPS=true` before starting the server.
 - If you scan the local WiFi QR code while `USE_HTTPS=false`, the phone must use `http://...:5000`. If it tries `https://...:5000`, Flask will log `400 Bad request` because it is receiving TLS traffic on a plain HTTP port.
 - The frontend now samples MediaPipe Holistic landmarks during recording and sends them with the video clip. If Holistic scripts fail to load, the app automatically falls back to the previous video-only pipeline.
+
+## Batch Evaluation With Pre-Made Clips
+
+You can benchmark quality on a fixed set of videos and compare runs before/after prompt or model changes.
+
+1. Create this structure:
+
+```text
+eval/
+  manifest.csv
+  clips/
+    your_clip_1.webm
+    your_clip_2.mp4
+  results/
+```
+
+2. Copy `eval/manifest.template.csv` to `eval/manifest.csv` and fill in your cases.
+
+3. Run the evaluator from repo root:
+
+```powershell
+python -m backend.evaluate_clips --manifest eval/manifest.csv --output-dir eval/results
+```
+
+4. The script writes a timestamped CSV in `eval/results/` with:
+- model prediction
+- exact match
+- token F1 score
+- required/forbidden term checks
+- pass/fail
+
+5. To compare changes, run it again after updates and diff the two result CSV files.

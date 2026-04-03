@@ -1,0 +1,4 @@
+case_id,clip_path,expected_text,required_terms,forbidden_terms,landmarks_path,notes
+case_001,clips/choking_1.webm,This person is choking and needs immediate assistance.,choking|immediate,fall|chest pain,,clear signer in bright room
+case_002,clips/chest_pain_1.webm,This person is reporting severe chest pain on the left side.,chest pain|left,choking|bleeding,,left hand points to chest
+case_003,clips/unclear_dark_1.webm,Please try again.,please try again,,,too dark and motion blur
