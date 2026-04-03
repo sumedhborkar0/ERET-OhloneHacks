@@ -1,0 +1,6 @@
+flask
+flask-socketio
+flask-cors
+google-generativeai
+python-dotenv
+qrcode[pil]

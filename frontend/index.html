@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <!-- Critical for mobile: prevents the page from zooming or mis-scaling -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>ASL Emergency Translator</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- STATUS BAR: shows WebSocket connection state at the top -->
+  <div id="status-bar">
+    <span id="connection-dot"></span>
+    <span id="connection-label">Connecting...</span>
+  </div>
+
+  <!-- CAMERA PREVIEW: live feed from the phone camera -->
+  <div id="camera-container">
+    <video id="preview" autoplay muted playsinline></video>
+    <!-- Overlay shown while recording with a pulsing red border -->
+    <div id="recording-overlay" class="hidden">
+      <span id="recording-label">● REC</span>
+    </div>
+  </div>
+
+  <!-- RECORD BUTTON: tap and hold -->
+  <div id="button-area">
+    <button id="record-btn" disabled>
+      <span id="btn-label">Hold to Sign</span>
+    </button>
+    <!-- Circular progress ring that fills over 6 seconds while recording -->
+    <svg id="progress-ring" viewBox="0 0 120 120">
+      <circle id="ring-track" cx="60" cy="60" r="54" />
+      <circle id="ring-fill"  cx="60" cy="60" r="54" />
+    </svg>
+  </div>
+
+  <!-- RESULT CARD: hidden until a result comes back -->
+  <div id="result-card" class="hidden">
+    <p id="result-text"></p>
+    <button id="again-btn">Sign Again</button>
+  </div>
+
+  <!-- SPINNER: shown while waiting for Gemini -->
+  <div id="spinner" class="hidden">
+    <div class="spin"></div>
+    <p id="spinner-label">Translating...</p>
+  </div>
+
+  <!-- Socket.IO client — loaded from the Flask server itself -->
+  <!-- Flask-SocketIO automatically serves this at /socket.io/socket.io.js -->
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="app.js"></script>
+
+</body>
+</html>
