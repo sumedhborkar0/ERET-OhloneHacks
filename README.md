@@ -56,3 +56,4 @@ python .\run.py
 - Camera access works through ngrok because the public URL is HTTPS.
 - If you want local adhoc HTTPS again, set `USE_HTTPS=true` before starting the server.
 - If you scan the local WiFi QR code while `USE_HTTPS=false`, the phone must use `http://...:5000`. If it tries `https://...:5000`, Flask will log `400 Bad request` because it is receiving TLS traffic on a plain HTTP port.
+- The frontend now samples MediaPipe Holistic landmarks during recording and sends them with the video clip. If Holistic scripts fail to load, the app automatically falls back to the previous video-only pipeline.

@@ -39,6 +39,7 @@
     <section class="camera-card">
       <div id="camera-container" title="Tap the camera to focus on the live view.">
         <video id="preview" autoplay muted playsinline></video>
+        <canvas id="overlay-canvas"></canvas>
         <div class="camera-gradient"></div>
         <button id="focus-camera-btn" class="camera-toggle camera-toggle-left" type="button">Fullscreen</button>
         <button id="toggle-camera-btn" class="camera-toggle" type="button">Toggle Camera</button>
@@ -80,6 +81,9 @@
   </main>
 
   <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/holistic/holistic.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

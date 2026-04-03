@@ -204,6 +204,19 @@ h1 {
   transform: scaleX(-1);
 }
 
+#overlay-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  pointer-events: none;
+}
+
+#overlay-canvas.is-mirrored {
+  transform: scaleX(-1);
+}
+
 .camera-gradient {
   position: absolute;
   inset: 0;

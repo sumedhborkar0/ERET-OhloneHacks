@@ -8,12 +8,20 @@ const state = {
   ringInterval: null,
   ringProgress: 0,
   maxRecordMs: 6000,
+  holistic: null,
+  holisticReady: false,
+  holisticBusy: false,
+  latestHolistic: null,
+  landmarkFrames: [],
+  holisticFrameCounter: 0,
+  holisticLoopId: null,
 };
 
 const el = {
   dot: document.getElementById("connection-dot"),
   connLabel: document.getElementById("connection-label"),
   preview: document.getElementById("preview"),
+  overlayCanvas: document.getElementById("overlay-canvas"),
   cameraContainer: document.getElementById("camera-container"),
   recOverlay: document.getElementById("recording-overlay"),
   focusCameraBtn: document.getElementById("focus-camera-btn"),
@@ -31,6 +39,9 @@ const el = {
 };
 
 let socket = null;
+const overlayCtx = el.overlayCanvas ? el.overlayCanvas.getContext("2d") : null;
+const POSE_INDICES = [0, 11, 12, 13, 14, 15, 16, 23, 24];
+const FACE_INDICES = [13, 14, 61, 291, 33, 263, 70, 300];
 
 if (typeof window.io !== "function") {
   el.dot.className = "disconnected";
@@ -100,8 +111,11 @@ async function initCamera() {
       audio: false,
     });
     el.preview.srcObject = state.stream;
+    await el.preview.play();
+    syncOverlaySize();
     applyFacingModeUI();
     el.toggleCameraBtn.disabled = false;
+    startHolisticLoop();
   } catch (err) {
     el.connLabel.textContent = `Camera unavailable: ${err.message}`;
     el.recordBtn.disabled = true;
@@ -164,6 +178,8 @@ function startRecording() {
 
   state.mediaRecorder.onstop = onRecordingStop;
   state.mediaRecorder.start(100);
+  state.landmarkFrames = [];
+  state.holisticFrameCounter = 0;
 
   show(el.recOverlay);
   el.recordBtn.classList.add("recording");
@@ -231,6 +247,7 @@ function onRecordingStop() {
     socket.emit("video_data", {
       video: buffer,
       mimeType: normalizedMimeType,
+      landmarks: state.landmarkFrames,
     });
   }).catch((err) => {
     hide(el.spinner);
@@ -300,7 +317,11 @@ function revealOutput() {
 }
 
 function applyFacingModeUI() {
-  el.preview.classList.toggle("is-mirrored", state.facingMode === "user");
+  const mirrored = state.facingMode === "user";
+  el.preview.classList.toggle("is-mirrored", mirrored);
+  if (el.overlayCanvas) {
+    el.overlayCanvas.classList.toggle("is-mirrored", mirrored);
+  }
 }
 
 function handleCameraContainerClick(event) {
@@ -324,6 +345,9 @@ function setFocusMode(enabled) {
 }
 
 function releaseStream() {
+  stopHolisticLoop();
+  clearOverlay();
+
   if (!state.stream) {
     return;
   }
@@ -335,4 +359,214 @@ function releaseStream() {
   state.stream = null;
 }
 
-initCamera();
+async function initHolistic() {
+  if (typeof window.Holistic !== "function") {
+    el.recordingHint.textContent = "MediaPipe Holistic could not load. Using video-only translation.";
+    return;
+  }
+
+  const holistic = new window.Holistic({
+    locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/holistic/${file}`,
+  });
+
+  holistic.setOptions({
+    modelComplexity: 1,
+    smoothLandmarks: true,
+    minDetectionConfidence: 0.5,
+    minTrackingConfidence: 0.5,
+    refineFaceLandmarks: false,
+  });
+
+  holistic.onResults((results) => {
+    state.latestHolistic = {
+      leftHandLandmarks: results.leftHandLandmarks || null,
+      rightHandLandmarks: results.rightHandLandmarks || null,
+      poseLandmarks: results.poseLandmarks || null,
+      faceLandmarks: results.faceLandmarks || null,
+    };
+    drawHolisticOverlay(results);
+  });
+
+  state.holistic = holistic;
+  state.holisticReady = true;
+  if (state.stream) {
+    startHolisticLoop();
+  }
+}
+
+function startHolisticLoop() {
+  if (!state.holisticReady || !state.holistic || !state.stream || state.holisticLoopId) {
+    return;
+  }
+
+  const run = async () => {
+    if (!state.stream) {
+      state.holisticLoopId = null;
+      return;
+    }
+
+    state.holisticLoopId = requestAnimationFrame(run);
+    state.holisticFrameCounter += 1;
+
+    if (state.holisticBusy || state.holisticFrameCounter % 2 !== 0) {
+      return;
+    }
+
+    state.holisticBusy = true;
+    try {
+      syncOverlaySize();
+      await state.holistic.send({ image: el.preview });
+
+      if (state.recording && state.holisticFrameCounter % 3 === 0) {
+        const packed = packHolisticFrame(state.latestHolistic);
+        if (packed) {
+          state.landmarkFrames.push(packed);
+        }
+      }
+    } catch (_) {
+      // Keep camera flow alive even if Holistic drops a frame.
+    } finally {
+      state.holisticBusy = false;
+    }
+  };
+
+  state.holisticLoopId = requestAnimationFrame(run);
+}
+
+function stopHolisticLoop() {
+  if (state.holisticLoopId) {
+    cancelAnimationFrame(state.holisticLoopId);
+    state.holisticLoopId = null;
+  }
+  state.holisticBusy = false;
+}
+
+function syncOverlaySize() {
+  if (!el.overlayCanvas) {
+    return;
+  }
+
+  const width = el.preview.videoWidth || 640;
+  const height = el.preview.videoHeight || 480;
+  if (el.overlayCanvas.width !== width || el.overlayCanvas.height !== height) {
+    el.overlayCanvas.width = width;
+    el.overlayCanvas.height = height;
+  }
+}
+
+function clearOverlay() {
+  if (!overlayCtx || !el.overlayCanvas) {
+    return;
+  }
+  overlayCtx.clearRect(0, 0, el.overlayCanvas.width, el.overlayCanvas.height);
+}
+
+function drawHolisticOverlay(results) {
+  if (!overlayCtx || !el.overlayCanvas || typeof window.drawConnectors !== "function" || typeof window.drawLandmarks !== "function") {
+    return;
+  }
+
+  clearOverlay();
+
+  const pose = results.poseLandmarks || [];
+  const left = results.leftHandLandmarks || [];
+  const right = results.rightHandLandmarks || [];
+  const face = results.faceLandmarks || [];
+
+  if (pose.length && window.POSE_CONNECTIONS) {
+    window.drawConnectors(overlayCtx, pose, window.POSE_CONNECTIONS, {
+      color: "#8bd2ff",
+      lineWidth: 2,
+    });
+    window.drawLandmarks(overlayCtx, pose, {
+      color: "#bce8ff",
+      radius: 2,
+    });
+  }
+
+  if (left.length && window.HAND_CONNECTIONS) {
+    window.drawConnectors(overlayCtx, left, window.HAND_CONNECTIONS, {
+      color: "#66ef9a",
+      lineWidth: 3,
+    });
+    window.drawLandmarks(overlayCtx, left, {
+      color: "#a6ffc4",
+      radius: 3,
+    });
+  }
+
+  if (right.length && window.HAND_CONNECTIONS) {
+    window.drawConnectors(overlayCtx, right, window.HAND_CONNECTIONS, {
+      color: "#ffb26a",
+      lineWidth: 3,
+    });
+    window.drawLandmarks(overlayCtx, right, {
+      color: "#ffd5a8",
+      radius: 3,
+    });
+  }
+
+  if (face.length) {
+    window.drawLandmarks(overlayCtx, face, {
+      color: "#f6d7ff",
+      radius: 1,
+    });
+  }
+}
+
+function pickLandmarks(landmarks, indices) {
+  if (!Array.isArray(landmarks)) {
+    return null;
+  }
+
+  return indices.map((index) => {
+    const point = landmarks[index];
+    if (!point) {
+      return null;
+    }
+    return {
+      x: point.x,
+      y: point.y,
+      z: point.z,
+      visibility: point.visibility,
+    };
+  });
+}
+
+function mapPoints(landmarks) {
+  if (!Array.isArray(landmarks)) {
+    return null;
+  }
+
+  return landmarks.map((point) => ({
+    x: point.x,
+    y: point.y,
+    z: point.z,
+    visibility: point.visibility,
+  }));
+}
+
+function packHolisticFrame(frame) {
+  if (!frame) {
+    return null;
+  }
+
+  const left = mapPoints(frame.leftHandLandmarks);
+  const right = mapPoints(frame.rightHandLandmarks);
+  const pose = pickLandmarks(frame.poseLandmarks, POSE_INDICES);
+  const face = pickLandmarks(frame.faceLandmarks, FACE_INDICES);
+
+  if (!left && !right && !pose && !face) {
+    return null;
+  }
+
+  return {
+    t: Date.now(),
+    left,
+    right,
+    pose,
+    face,
+  };
+}
+
+Promise.allSettled([initCamera(), initHolistic()]);
