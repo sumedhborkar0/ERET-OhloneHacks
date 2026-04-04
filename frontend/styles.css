@@ -200,7 +200,22 @@ h1 {
   object-fit: cover;
 }
 
+#tracking-overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+  z-index: 2;
+  opacity: 0.95;
+}
+
 #preview.is-mirrored {
+  transform: scaleX(-1);
+}
+
+#tracking-overlay.is-mirrored {
   transform: scaleX(-1);
 }
 
@@ -213,11 +228,64 @@ h1 {
   pointer-events: none;
 }
 
+.tracking-hud {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  z-index: 3;
+  display: grid;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.tracking-pills-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.tracking-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  width: fit-content;
+  padding: 9px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(117, 245, 216, 0.2);
+  background: rgba(10, 24, 26, 0.56);
+  color: #effdf8;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 14px 28px rgba(0, 0, 0, 0.18);
+  backdrop-filter: blur(16px);
+}
+
+.tracking-pill-subtle {
+  background: rgba(10, 24, 26, 0.42);
+}
+
+.tracking-pill-label {
+  color: rgba(188, 255, 241, 0.8);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+#tracking-status,
+#face-status,
+#hands-status {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+}
+
 .camera-toggle {
   position: absolute;
   top: 12px;
   right: 12px;
-  z-index: 3;
+  z-index: 4;
   border: 1px solid rgba(255, 255, 255, 0.22);
   border-radius: 999px;
   background: rgba(24, 18, 14, 0.6);
@@ -409,6 +477,12 @@ body.camera-focus #camera-container {
   aspect-ratio: auto;
   border-radius: 0;
   border: none;
+  background: #050505;
+}
+
+body.camera-focus #preview,
+body.camera-focus #tracking-overlay {
+  object-fit: contain;
 }
 
 body.camera-focus .camera-gradient {
@@ -417,27 +491,79 @@ body.camera-focus .camera-gradient {
     linear-gradient(0deg, rgba(0, 0, 0, 0.58), rgba(0, 0, 0, 0) 28%);
 }
 
+body.camera-focus .tracking-hud {
+  left: 14px;
+  right: auto;
+  bottom: max(104px, calc(env(safe-area-inset-bottom) + 114px));
+  gap: 6px;
+  z-index: 24;
+  max-width: 180px;
+}
+
 body.camera-focus .controls-row {
   position: absolute;
-  left: 0;
-  right: 0;
-  bottom: max(12px, calc(env(safe-area-inset-bottom) + 32px));
-  grid-template-columns: 1fr;
-  justify-items: center;
-  gap: 10px;
-  padding: 0 16px;
-  z-index: 21;
+  left: 14px;
+  right: 14px;
+  bottom: max(16px, calc(env(safe-area-inset-bottom) + 14px));
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 10px 14px;
+  padding: 0;
+  z-index: 23;
 }
 
 body.camera-focus .recording-copy {
-  max-width: 320px;
+  grid-column: 1 / -1;
+  width: 100%;
+  max-width: none;
   text-align: center;
   gap: 4px;
+  padding: 10px 12px;
+  border-radius: 16px;
+  background: rgba(10, 8, 7, 0.46);
+  backdrop-filter: blur(14px);
 }
 
 body.camera-focus .control-title,
 body.camera-focus #recording-hint {
   color: #f8ede2;
+}
+
+body.camera-focus #button-area {
+  width: 170px;
+  height: 64px;
+  justify-self: end;
+}
+
+body.camera-focus #record-btn {
+  width: 170px;
+  height: 64px;
+  position: absolute;
+  right: 0;
+}
+
+body.camera-focus .camera-toggle {
+  top: max(14px, calc(env(safe-area-inset-top) + 10px));
+}
+
+body.camera-focus .tracking-pill {
+  padding: 7px 10px;
+  gap: 6px;
+}
+
+body.camera-focus .tracking-pills-row {
+  gap: 6px;
+}
+
+body.camera-focus .tracking-pill-label {
+  font-size: 9px;
+  letter-spacing: 0.12em;
+}
+
+body.camera-focus #tracking-status,
+body.camera-focus #face-status,
+body.camera-focus #hands-status {
+  font-size: 11px;
 }
 
 body.camera-focus .output-dock {

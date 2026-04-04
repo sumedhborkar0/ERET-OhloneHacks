@@ -39,7 +39,24 @@
     <section class="camera-card">
       <div id="camera-container" title="Tap the camera to focus on the live view.">
         <video id="preview" autoplay muted playsinline></video>
+        <canvas id="tracking-overlay" aria-hidden="true"></canvas>
         <div class="camera-gradient"></div>
+        <div id="tracking-hud" class="tracking-hud">
+          <div class="tracking-pill">
+            <span class="tracking-pill-label">Tracking</span>
+            <span id="tracking-status">Initializing...</span>
+          </div>
+          <div class="tracking-pills-row">
+            <div class="tracking-pill tracking-pill-subtle">
+              <span class="tracking-pill-label">Face</span>
+              <span id="face-status">Waiting</span>
+            </div>
+            <div class="tracking-pill tracking-pill-subtle">
+              <span class="tracking-pill-label">Hands</span>
+              <span id="hands-status">Waiting</span>
+            </div>
+          </div>
+        </div>
         <button id="focus-camera-btn" class="camera-toggle camera-toggle-left" type="button">Fullscreen</button>
         <button id="toggle-camera-btn" class="camera-toggle" type="button">Toggle Camera</button>
         <div id="recording-overlay" class="hidden">
@@ -79,6 +96,9 @@
     </section>
   </main>
 
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js"></script>
   <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
   <script src="app.js"></script>
 </body>
