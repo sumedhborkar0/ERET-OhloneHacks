@@ -135,12 +135,17 @@ body {
   text-transform: uppercase;
 }
 
-h1 {
-  max-width: 11ch;
+.hero-title {
+  max-width: none;
   font-family: "Fraunces", Georgia, serif;
-  font-size: clamp(2rem, 7.2vw, 3.15rem);
+  font-size: clamp(2rem, 6.6vw, 3.05rem);
   line-height: 0.96;
   letter-spacing: -0.05em;
+  text-wrap: balance;
+}
+
+.hero-title span {
+  display: block;
 }
 
 .hero-copy,
