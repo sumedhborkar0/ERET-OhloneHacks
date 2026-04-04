@@ -20,18 +20,15 @@ AUTO_START_NGROK = os.getenv("AUTO_START_NGROK", "true").strip().lower() in {"1"
 NGROK_PATH = os.getenv("NGROK_PATH", "").strip()
 
 GEMINI_PROMPT = """You are an emergency ASL interpreter assisting first responders.
-A person is signing a single word/phrase in American Sign Language in this video clip.
-Describe what emergency they are communicating in a single clear sentence,
-Written in third person as if reporting to a 911 dispatcher.
-It will likely be an emergency room or first-responder situation.
+A person is signing a single word/phrase. Find the word or phrase. It is an emergency context.
 
 Examples of good responses:
 - "This person is choking."
-- "This person is reporting severe chest pain."
-- "This person is indicating they cannot breathe."
+- "This person has fallen."
+- "This person is saying to stop."
 
 
-- Focus on urgent medical or safety situations. 
+- It is an emergency medical situation
 - The MOST frequent examples include: emergency, stop, choking, trouble breathing, chest pain / heart attack, unconsciousness, falls, bleeding, assault, severe pain, stab, gunshot, or a major injury or health condition.
 If the signing is unclear or the video is too dark or obstructed, respond:
 "Please try again."
@@ -39,11 +36,9 @@ DO NOT HALLUCINATE. IF YOU ARE UNSURE, WRITE THE PHRASE: "Please try again."
 
 Rules:
 - Respond with only the one sentence. No preamble, no explanation.
-- Never say "the signer" - always say "this person".
-- Be specific about body location if a sign indicates it (chest, head, arm).
 - If the signing suggests a concrete injury, prefer the injury itself over vague phrasing like "needs help."
-- Do not describe non-emergency everyday needs such as eating, drinking, being tired, or wanting comfort unless they are clearly part of a serious emergency.
 - If the signing seems understandable but clearly not emergency-related at all, respond with exactly: "Please try again."
+- Do not respond with non-emergency-related responses.
 - The sentence must be complete and end with a period.
 - Do not output fragments such as "This person is signing that they" or any sentence that ends mid-thought.
 - If you are not confident or the sentence would be incomplete, respond with exactly: "Please try again."
