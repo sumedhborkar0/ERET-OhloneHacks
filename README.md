@@ -1,4 +1,4 @@
-ASL Translator - Ohlone Hackathon 2026
+**EMERGENCY ROOM EMERGENCY TRANSLATOR** - Ohlone Hackathon 2026
 
 Project Overview
 
