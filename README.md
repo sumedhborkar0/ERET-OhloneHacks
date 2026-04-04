@@ -10,13 +10,13 @@ About the Repository
 This repository contains the web application built for the **Ohlone Hackathon 2026**. 
 
  Key Features
-* **Emergency-Focused Translation:** Specifically trained to recognize high-priority ASL words and phrases used in medical settings.
-* **Live Camera Access:** Utilizes HTTPS tunneling to securely request and access the mobile device's camera to read ASL signs.
-* **Vertex AI Integration:** Connects to Google Cloud's Vertex AI to power the core artificial intelligence translation features.
-* **Real-time Communication:** Implements Socket.IO to handle live data streaming between the frontend and the backend.
+* Emergency-Focused Translation:** Specifically trained to recognize high-priority ASL words and phrases used in medical settings.
+* Live Camera Access:** Utilizes HTTPS tunneling to securely request and access the mobile device's camera to read ASL signs.
+* Vertex AI Integration:** Connects to Google Cloud's Vertex AI to power the core artificial intelligence translation features.
+* Real-time Communication:** Implements Socket.IO to handle live data streaming between the frontend and the backend.
 
 Tech Stack
-* **Backend:** Python, Flask, Socket.IO
-* **Frontend:** JavaScript, HTML, CSS
-* **Cloud & AI:** Google Cloud Vertex AI
-* **Tools:** Ngrok (for local server exposure)
+* Backend: Python, Flask, Socket.IO
+* Frontend: JavaScript, HTML, CSS
+* Cloud & AI: Google Cloud Vertex AI
+* Tools: Ngrok (for local server exposure)
