@@ -53,6 +53,52 @@ _DANGLING_ENDINGS = {
 }
 
 
+def _normalize_tracking_samples(tracking_data) -> list[dict]:
+    if not isinstance(tracking_data, list):
+        return []
+
+    normalized_samples: list[dict] = []
+    for sample in tracking_data[:40]:
+        if not isinstance(sample, dict):
+            continue
+
+        t_ms = sample.get("tMs")
+        face = sample.get("face")
+        hands = sample.get("hands")
+
+        if not isinstance(t_ms, (int, float)):
+            continue
+
+        normalized_sample = {"tMs": int(t_ms)}
+        if isinstance(face, dict):
+            normalized_sample["face"] = face
+        if isinstance(hands, list):
+            normalized_sample["hands"] = hands[:2]
+        normalized_samples.append(normalized_sample)
+
+    return normalized_samples
+
+
+def _build_tracking_context(tracking_data) -> str:
+    samples = _normalize_tracking_samples(tracking_data)
+    if not samples:
+        return ""
+
+    face_count = sum(1 for sample in samples if sample.get("face"))
+    hands_count = sum(len(sample.get("hands", [])) for sample in samples)
+    first_t = samples[0]["tMs"]
+    last_t = samples[-1]["tMs"]
+
+    return (
+        "Client-side tracking summary sampled across the clip at a sparse interval. "
+        "Use this only as secondary context; the video itself is the primary evidence.\n"
+        f"- Time span covered: {first_t} ms to {last_t} ms.\n"
+        f"- Samples: {samples}\n"
+        f"- Face detected in {face_count}/{len(samples)} samples.\n"
+        f"- Total hand detections across samples: {hands_count}."
+    )
+
+
 def normalize_mime_type(mime_type: str | None) -> str:
     if not mime_type:
         return "video/webm"
@@ -126,16 +172,18 @@ def _generate_sentence(video_bytes: bytes, mime_type: str, prompt: str) -> str:
     return _cleanup_sentence(_extract_text(response))
 
 
-def translate_video(video_bytes: bytes, mime_type: str) -> str:
+def translate_video(video_bytes: bytes, mime_type: str, tracking_data=None) -> str:
     normalized_mime_type = normalize_mime_type(mime_type)
+    tracking_context = _build_tracking_context(tracking_data)
+    prompt = GEMINI_PROMPT if not tracking_context else f"{GEMINI_PROMPT}\n\n{tracking_context}"
 
     try:
-        sentence = _generate_sentence(video_bytes, normalized_mime_type, GEMINI_PROMPT)
+        sentence = _generate_sentence(video_bytes, normalized_mime_type, prompt)
         if not _is_complete_sentence(sentence):
             sentence = _generate_sentence(
                 video_bytes,
                 normalized_mime_type,
-                f"{GEMINI_PROMPT}\n\n{RETRY_PROMPT_SUFFIX}",
+                f"{prompt}\n\n{RETRY_PROMPT_SUFFIX}",
             )
     except errors.ClientError as exc:
         raise ValueError(

@@ -22,11 +22,16 @@ const state = {
   lastFaceResultAt: 0,
   faceTrackingMode: "off",
   faceFailureCount: 0,
+  recordingStartedAt: 0,
+  lastTrackingSampleAt: 0,
+  trackingSamples: [],
   processingCanvas: document.createElement("canvas"),
   faceProcessingCanvas: document.createElement("canvas"),
   processingCtx: null,
   faceProcessingCtx: null,
 };
+
+const TRACKING_SAMPLE_INTERVAL_MS = 200;
 
 const el = {
   dot: document.getElementById("connection-dot"),
@@ -204,6 +209,39 @@ function drawFaceOverlay(landmarks) {
   });
 }
 
+function roundCoord(value) {
+  return Math.round(value * 1000) / 1000;
+}
+
+function summarizeFaceLandmarks(landmarks) {
+  if (!Array.isArray(landmarks) || landmarks.length === 0) {
+    return null;
+  }
+
+  let minX = 1;
+  let minY = 1;
+  let maxX = 0;
+  let maxY = 0;
+
+  for (const point of landmarks) {
+    minX = Math.min(minX, point.x);
+    minY = Math.min(minY, point.y);
+    maxX = Math.max(maxX, point.x);
+    maxY = Math.max(maxY, point.y);
+  }
+
+  return {
+    center: [roundCoord((minX + maxX) / 2), roundCoord((minY + maxY) / 2)],
+    size: [roundCoord(maxX - minX), roundCoord(maxY - minY)],
+    mouth: landmarks[13] && landmarks[14]
+      ? [
+        roundCoord((landmarks[13].x + landmarks[14].x) / 2),
+        roundCoord((landmarks[13].y + landmarks[14].y) / 2),
+      ]
+      : null,
+  };
+}
+
 function normalizeHandLabel(label, landmarks) {
   if (label === "Left" || label === "Right") {
     return label;
@@ -247,6 +285,41 @@ function getTrackedHands() {
   return trackedHands;
 }
 
+function summarizeHandLandmarks(trackedHands) {
+  return trackedHands.map(({ label, landmarks }) => ({
+    label: label || "Unknown",
+    wrist: landmarks[0]
+      ? [roundCoord(landmarks[0].x), roundCoord(landmarks[0].y)]
+      : null,
+    palm: landmarks[9]
+      ? [roundCoord(landmarks[9].x), roundCoord(landmarks[9].y)]
+      : null,
+    indexTip: landmarks[8]
+      ? [roundCoord(landmarks[8].x), roundCoord(landmarks[8].y)]
+      : null,
+  }));
+}
+
+function recordTrackingSample(trackedHands, faceTracked) {
+  if (!state.recording || !state.recordingStartedAt) {
+    return;
+  }
+
+  const now = performance.now();
+  const elapsedMs = Math.max(0, Math.round(now - state.recordingStartedAt));
+  if (elapsedMs - state.lastTrackingSampleAt < TRACKING_SAMPLE_INTERVAL_MS) {
+    return;
+  }
+
+  state.lastTrackingSampleAt = elapsedMs;
+
+  state.trackingSamples.push({
+    tMs: elapsedMs,
+    face: faceTracked ? summarizeFaceLandmarks(state.latestFaceLandmarks) : null,
+    hands: summarizeHandLandmarks(trackedHands),
+  });
+}
+
 function drawTrackingOverlay(width, height) {
   resizeOverlayCanvas(width, height);
   overlayCtx.clearRect(0, 0, width, height);
@@ -264,6 +337,8 @@ function drawTrackingOverlay(width, height) {
   const trackedHands = getTrackedHands();
   const handsTracked = trackedHands.length;
   const lockStrength = faceTracked || handsTracked > 0;
+
+  recordTrackingSample(trackedHands, faceTracked);
 
   strokeCorners(
     overlayCtx,
@@ -499,6 +574,9 @@ async function initCamera() {
     state.latestFaceLandmarks = null;
     state.lastHandsResultAt = 0;
     state.lastFaceResultAt = 0;
+    state.recordingStartedAt = 0;
+    state.lastTrackingSampleAt = 0;
+    state.trackingSamples = [];
     applyFacingModeUI();
     el.toggleCameraBtn.disabled = false;
     await el.preview.play().catch(() => {});
@@ -535,6 +613,9 @@ function startRecording() {
   state.chunks = [];
   state.lastTrackingRunAt = 0;
   state.frameCounter = 0;
+  state.recordingStartedAt = performance.now();
+  state.lastTrackingSampleAt = -TRACKING_SAMPLE_INTERVAL_MS;
+  state.trackingSamples = [];
 
   const mimeType = pickSupportedMimeType();
   if (!mimeType) {
@@ -637,6 +718,7 @@ function onRecordingStop() {
     socket.emit("video_data", {
       video: buffer,
       mimeType: normalizedMimeType,
+      tracking: state.trackingSamples,
     });
   }).catch((err) => {
     hide(el.spinner);

@@ -35,6 +35,7 @@ def handle_video(data):
 
         video_bytes = data.get("video")
         mime_type = normalize_mime_type(data.get("mimeType", "video/webm"))
+        tracking_data = data.get("tracking")
 
         if not isinstance(video_bytes, (bytes, bytearray)):
             raise ValueError("Video payload is missing.")
@@ -42,7 +43,7 @@ def handle_video(data):
         if len(video_bytes) < 5000:
             raise ValueError("Recording too short. Hold the button while signing.")
 
-        sentence = translate_video(bytes(video_bytes), mime_type)
+        sentence = translate_video(bytes(video_bytes), mime_type, tracking_data)
         emit("result", {"sentence": sentence})
 
     except TimeoutError:
