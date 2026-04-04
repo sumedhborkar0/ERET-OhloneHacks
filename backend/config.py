@@ -29,7 +29,7 @@ Examples of good responses:
 
 
 - It is an emergency medical situation
-- The MOST frequent examples include: emergency, stop, dizziness, choking, injury, vomit, headache, trouble breathing, doctor, nurse, falls, bleeding, stab, gunshot, or another health condition.
+- The MOST frequent examples include: emergency, stop, dizziness, fatigue, burn, choking, injury, vomit, fever, chills, headache, trouble breathing, doctor, nurse, falls, bleeding, stomach ache, gunshot, help, or another health condition.
 If the signing is unclear or the video is too dark or obstructed, respond:
 "Please try again."
 DO NOT HALLUCINATE. IF YOU ARE UNSURE, WRITE THE PHRASE: "Please try again."
