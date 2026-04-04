@@ -134,9 +134,6 @@ def _is_complete_sentence(text: str) -> bool:
     if lower_sentence == "please try again":
         return True
 
-    if not lower_sentence.startswith("this person"):
-        return False
-
     if sentence[-1] not in ".!?":
         return False
 
