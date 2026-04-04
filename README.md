@@ -1,4 +1,4 @@
-**EMERGENCY ROOM EMERGENCY TRANSLATOR** - Ohlone Hackathon 2026
+**EMERGENCY ROOM EMERGENCY TRANSLATOR** - First Place @ Ohlone Hackathon 2026
 
 Project Overview
 
@@ -20,3 +20,5 @@ Tech Stack
 * Frontend: JavaScript, HTML, CSS
 * Cloud & AI: Google Cloud Vertex AI
 * Tools: Ngrok (for local server exposure)
+
+SEE MORE AT: https://docs.google.com/presentation/d/12agLUpcxse6a4bWX_O8mfc9qg5ux2PRI7mA8640nHGs/edit?usp=sharing
