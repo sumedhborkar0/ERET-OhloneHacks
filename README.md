@@ -2,7 +2,7 @@
 
 Project Overview
 
-This is an American Sign Language (ASL) Translator designed specifically for hospital and emergency service environments.** The core purpose of this project is to use real-time mobile camera access and AI to bridge the communication gap between medical professionals and deaf or hard-of-hearing patients during critical moments. 
+This is an American Sign Language (ASL) Translator designed specifically for hospital and emergency service environments. The core purpose of this project is to use real-time mobile camera access and AI to bridge the communication gap between medical professionals and deaf or hard-of-hearing patients during critical moments. 
 
 Important Capability Note: This application is built for rapid emergency communication and currently only translates individual words or short phrases (e.g., "stop," "help," "fever"). It does *not* translate continuous, full-sentence ASL conversations.
 
