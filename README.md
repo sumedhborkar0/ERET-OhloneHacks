@@ -1,5 +1,7 @@
 **EMERGENCY ROOM EMERGENCY TRANSLATOR (ERET)** - First Place @ Ohlone Hackathon 2026
 
+Developed with assistance of AI tools including Cursor, Codex, and Claude Code
+
 Project Overview
 
 This is an American Sign Language (ASL) Translator designed specifically for hospital and emergency service environments. The core purpose of this project is to use real-time mobile camera access and AI to bridge the communication gap between medical professionals and deaf or hard-of-hearing patients during critical moments. 
